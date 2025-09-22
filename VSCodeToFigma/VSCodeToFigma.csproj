@@ -39,6 +39,9 @@
     <Reference Include="HiQPdf, Version=17.0.0.0, Culture=neutral, PublicKeyToken=acd8b62594985b24, processorArchitecture=MSIL">
       <HintPath>..\packages\HiQPdf.17.0.0\lib\net40\HiQPdf.dll</HintPath>
     </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.12.3.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.12.3\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -56,21 +59,17 @@
     <Compile Include="HtmlToSvgAdi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Replacer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  
-   <Target Name="CopyInkScapeFolder" AfterTargets="Build">
-	  <ItemGroup>
-		<InkScapeFiles Include="InkScape\**\*.*" />
-	  </ItemGroup>
-	  <Copy SourceFiles="@(InkScapeFiles)" 
-			DestinationFolder="$(OutputPath)InkScape\%(RecursiveDir)" 
-			SkipUnchangedFiles="true" />
-	</Target>
-  
+  <Target Name="CopyInkScapeFolder" AfterTargets="Build">
+    <ItemGroup>
+      <InkScapeFiles Include="InkScape\**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(InkScapeFiles)" DestinationFolder="$(OutputPath)InkScape\%(RecursiveDir)" SkipUnchangedFiles="true" />
+  </Target>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  
 </Project>

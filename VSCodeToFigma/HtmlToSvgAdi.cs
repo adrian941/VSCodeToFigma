@@ -1,4 +1,5 @@
 ﻿using HiQPdf;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -9,8 +10,10 @@ namespace VSCodeToFigma
 {
     public static class HtmlToSvgAdi
     {
-        public static void Convert(string htmlCode)
+        public static void ConvertAndSaveToFile(string htmlCode, string fileNumber, string mode, bool setToClipboard)
         {
+   
+
 
             HtmlToSvg htmlToSvgConverter = new HtmlToSvg
             {
@@ -24,42 +27,23 @@ namespace VSCodeToFigma
 
 
 
+
+
+
+
+
             string baseDirectory = @"A:\SVG";
-            if (!Directory.Exists(baseDirectory))
-            {
-                //throw new DirectoryNotFoundException($"The directory '{baseDirectory}' does not exist.");
 
-                MessageBox.Show($"The directory '{baseDirectory}' does not exist.", "Directory Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            string svgLatestFileName = Path.Combine(baseDirectory, $"{fileNumber}_{mode}.svg");
+          
 
-                return;
-            }
-
-
-            string[] svgAlreadyExistingFiles = Directory.GetFiles(baseDirectory, "*.svg");
-            int maximumFileNumber = 0;
-            foreach (string svgFile in svgAlreadyExistingFiles)
-            {
-                string fileName = Path.GetFileNameWithoutExtension(svgFile);
-                if (int.TryParse(fileName, out int fileNumber))
-                {
-                    if (fileNumber > maximumFileNumber)
-                    {
-                        maximumFileNumber = fileNumber;
-                    }
-                }
-            }
-            maximumFileNumber++;
-
-
-
-            string svgLatestFileName = Path.Combine(baseDirectory, $"{maximumFileNumber}.svg");
             htmlToSvgConverter.ConvertHtmlToFile(htmlCode, baseUrl, svgLatestFileName);
 
             // Replace in File <svg width="264.583mm" height="264.583mm" with <svg 
 
             var content = File.ReadAllText(svgLatestFileName);
 
-            content = Regex.Replace(content, @"\s(width|height)=(""|').*?\2", "", RegexOptions.IgnoreCase);
+            content = ReplaceWH(content);
 
             File.WriteAllText(svgLatestFileName, content);
 
@@ -67,7 +51,7 @@ namespace VSCodeToFigma
 
             if (!File.Exists(svgLatestFileName))
             {
-                return;
+                return ;
             }
 
 
@@ -87,36 +71,39 @@ namespace VSCodeToFigma
 
             if (!File.Exists(svgLatestFileName))
             {
-                return;
+                return ;
             }
 
-            Clipboard.SetFileDropList(new System.Collections.Specialized.StringCollection { svgLatestFileName });
 
-            var svgContent = File.ReadAllText(svgLatestFileName);
-            var dataObj = new DataObject();
-            dataObj.SetData(DataFormats.Text, svgContent); // text simplu
-            dataObj.SetData("image/svg+xml", svgContent);  // format SVG
-
-            Clipboard.SetDataObject(dataObj, true);
-
-            // Show a little icon to indicate success and dissapearing after 2 seconds
-            // The NotifyIcon should have a background foto the .svg file !
-
-            NotifyIcon notifyIcon = new NotifyIcon
+            if(setToClipboard)
             {
-                Icon = SystemIcons.Information,
-                Visible = true,
-                BalloonTipTitle = $"SVG '{maximumFileNumber}.svg' is Done!",
-                BalloonTipText = $"File is ready",
+                Clipboard.SetFileDropList(new System.Collections.Specialized.StringCollection { svgLatestFileName });
 
-
-            };
-            notifyIcon.ShowBalloonTip(2000);
-
-
-
-
+                var svgContent = File.ReadAllText(svgLatestFileName);
+                var dataObj = new DataObject();
+                dataObj.SetData(DataFormats.Text, svgContent); // text simplu
+                dataObj.SetData("image/svg+xml", svgContent);  // format SVG
+                Clipboard.SetDataObject(dataObj, true);
+            }
+         
 
         }
+
+      
+ 
+    public static string ReplaceWH(string input)
+    {
+        // elimină width="...mm"
+        input = Regex.Replace(input, @"\s*width=""[^""]*mm""", "", RegexOptions.IgnoreCase);
+
+        // elimină height="...mm"
+        input = Regex.Replace(input, @"\s*height=""[^""]*mm""", "", RegexOptions.IgnoreCase);
+
+        return input;
     }
+
+
+
+
+}
 }
